@@ -1,3 +1,3 @@
 # rcloud
 
-* Rcloud - Python Simple GUI Test
+* Rcloud - Streamlit GUI Test

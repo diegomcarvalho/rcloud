@@ -1,26 +1,34 @@
-import PySimpleGUIQt as sg
+import streamlit as st
 import os
 
-# sg.theme("DarkAmber")  # Add a touch of color
-# All the stuff inside your window.
-layout = [
-    [sg.Text("Cloud Mount")],
-    [sg.Button("OneDrive")],
-    [sg.Button("DreamHost")],
-    [sg.Button("GoogleDrive")],
-    [sg.Button("DropBox")],
-    [sg.Button("Cancel")],
-]
+st.title("Cloud System")
 
-# Create the Window
-window = sg.Window("Cloud Mount", layout, font=("Helvetica", 20))
-# Event Loop to process "events" and get the "values" of the inputs
-while True:
-    event, values = window.read()
-    if (
-        event == sg.WIN_CLOSED or event == "Cancel"
-    ):  # if user closes window or clicks cancel
-        break
-    os.system(f"/Users/carvalho/bin/cloudmount {event}")
+status = os.popen("df -h | fgrep Cloud").read()
 
-window.close()
+st.text(status)
+
+remotes = os.popen("rclone listremotes").read().strip().replace("\n", "").split(":")
+
+mnt_remotes = list()
+umt_remotes = list()
+
+for i in remotes[:-1]:
+    if i in status:
+        umt_remotes.append(i)
+    else:
+        mnt_remotes.append(i)
+
+add_umt_selectbox = st.sidebar.selectbox("Umount a remote", umt_remotes)
+buttton_umt = st.sidebar.button("Umount")
+add_mnt_selectbox = st.sidebar.selectbox("Mount a remote", mnt_remotes)
+buttton_mnt = st.sidebar.button("Mount")
+
+if buttton_umt:
+    with st.spinner(f"Umounting {add_umt_selectbox}..."):
+        os.system(f"umount {add_umt_selectbox}:")
+    st.experimental_rerun()
+
+if buttton_mnt:
+    with st.spinner(f"Mounting {add_mnt_selectbox}..."):
+        os.system(f"/Users/carvalho/bin/cloudmount {add_mnt_selectbox}")
+    st.experimental_rerun()
